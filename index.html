@@ -1,0 +1,1396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hollywood Empire</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: Arial, sans-serif; background: #1a1a2e; color: #e0e0e0; font-size: 14px; }
+
+  /* LAYOUT */
+  #app { display: flex; flex-direction: column; min-height: 100vh; }
+  #topbar { background: #16213e; border-bottom: 2px solid #0f3460; padding: 10px 16px; display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+  #topbar h1 { color: #e94560; font-size: 18px; font-weight: bold; }
+  .studio-info { color: #a0a0b0; font-size: 12px; }
+  #main-layout { display: flex; flex: 1; }
+  #sidebar { width: 160px; background: #16213e; border-right: 1px solid #0f3460; padding: 10px 0; flex-shrink: 0; }
+  #content { flex: 1; padding: 16px; overflow-y: auto; }
+
+  /* SIDEBAR NAV */
+  .nav-item { padding: 10px 16px; cursor: pointer; color: #a0a0b0; border-left: 3px solid transparent; font-size: 13px; }
+  .nav-item:hover { background: #0f3460; color: #e0e0e0; }
+  .nav-item.active { background: #0f3460; color: #e94560; border-left-color: #e94560; }
+  .nav-section { padding: 8px 16px 4px; font-size: 10px; color: #606080; text-transform: uppercase; letter-spacing: 1px; margin-top: 8px; }
+
+  /* PANELS */
+  .panel { background: #16213e; border: 1px solid #0f3460; border-radius: 4px; padding: 16px; margin-bottom: 14px; }
+  .panel-title { font-size: 11px; text-transform: uppercase; letter-spacing: 2px; color: #e94560; margin-bottom: 12px; border-bottom: 1px solid #0f3460; padding-bottom: 8px; }
+  .page-title { font-size: 20px; color: #e0e0e0; margin-bottom: 16px; font-weight: bold; }
+
+  /* TABLES */
+  table { width: 100%; border-collapse: collapse; }
+  th { text-align: left; padding: 8px 10px; font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: #808090; border-bottom: 1px solid #0f3460; }
+  td { padding: 8px 10px; border-bottom: 1px solid #0f3460; color: #c0c0d0; font-size: 13px; }
+  tr:hover td { background: #0f3460; cursor: pointer; }
+  tr.selected td { background: #1a3a6e; }
+
+  /* STARS */
+  .stars { color: #e94560; font-size: 13px; letter-spacing: 1px; }
+  .stars-empty { color: #404060; }
+
+  /* BADGES */
+  .badge { display: inline-block; padding: 2px 7px; border-radius: 3px; font-size: 10px; font-weight: bold; margin: 2px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .badge-red { background: #e9456022; border: 1px solid #e94560; color: #e94560; }
+  .badge-blue { background: #0f346022; border: 1px solid #4a90d9; color: #4a90d9; }
+  .badge-green { background: #20604022; border: 1px solid #40c060; color: #40c060; }
+  .badge-yellow { background: #c0901022; border: 1px solid #c09010; color: #c09010; }
+  .badge-purple { background: #8040c022; border: 1px solid #a060e0; color: #a060e0; }
+  .badge-gray { background: #40404022; border: 1px solid #808090; color: #808090; }
+
+  /* BUTTONS */
+  .btn { padding: 8px 16px; border: none; border-radius: 3px; cursor: pointer; font-size: 12px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; }
+  .btn-primary { background: #e94560; color: white; }
+  .btn-primary:hover { background: #c73350; }
+  .btn-secondary { background: #0f3460; color: #c0c0d0; border: 1px solid #4a90d9; }
+  .btn-secondary:hover { background: #1a4a80; }
+  .btn-success { background: #207040; color: white; border: 1px solid #40c060; }
+  .btn-success:hover { background: #308050; }
+  .btn-sm { padding: 4px 10px; font-size: 11px; }
+
+  /* FORMS */
+  select, input { background: #0f1a30; border: 1px solid #0f3460; color: #e0e0e0; padding: 7px 10px; border-radius: 3px; font-size: 13px; width: 100%; }
+  select:focus, input:focus { outline: 1px solid #e94560; }
+  label { font-size: 11px; color: #808090; text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 4px; margin-top: 12px; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .form-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+
+  /* TALENT DETAIL */
+  .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .detail-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+  .stat-box { background: #0f1a30; border: 1px solid #0f3460; border-radius: 3px; padding: 12px; text-align: center; }
+  .stat-box .val { font-size: 22px; font-weight: bold; color: #e94560; }
+  .stat-box .lbl { font-size: 10px; color: #606080; text-transform: uppercase; letter-spacing: 1px; margin-top: 3px; }
+  .skill-row { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px solid #0f1a30; }
+  .skill-name { font-size: 12px; color: #a0a0b0; }
+  .skill-bar-wrap { display: flex; align-items: center; gap: 8px; }
+  .skill-bar { height: 6px; background: #0f1a30; border-radius: 3px; width: 80px; }
+  .skill-bar-fill { height: 100%; border-radius: 3px; background: #e94560; }
+
+  /* ROLE SLOTS */
+  .role-slot { background: #0f1a30; border: 1px solid #0f3460; border-radius: 3px; padding: 10px 14px; margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center; }
+  .role-slot.filled { border-color: #40c060; }
+  .role-slot.empty { border-color: #606080; border-style: dashed; }
+  .role-type { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: #808090; }
+  .role-actor { font-size: 13px; color: #e0e0e0; }
+
+  /* GRID LAYOUTS */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+
+  /* MISC */
+  .text-muted { color: #606080; font-size: 12px; }
+  .text-red { color: #e94560; }
+  .text-green { color: #40c060; }
+  .text-yellow { color: #c0a020; }
+  .divider { border: none; border-top: 1px solid #0f3460; margin: 14px 0; }
+  .empty-state { color: #606080; font-style: italic; padding: 20px; text-align: center; }
+
+  /* MOBILE */
+  @media (max-width: 600px) {
+    #sidebar { width: 120px; }
+    .nav-item { padding: 10px 10px; font-size: 12px; }
+    .form-row, .form-row-3, .grid-2, .grid-3, .detail-grid, .detail-grid-3 { grid-template-columns: 1fr; }
+    .skill-bar { width: 50px; }
+  }
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="topbar">
+    <h1>🎬 Hollywood Empire</h1>
+    <div class="studio-info" id="studio-info">Placeholder Studios &nbsp;|&nbsp; Week 1, Year 2000</div>
+  </div>
+  <div id="main-layout">
+    <div id="sidebar">
+      <div class="nav-section">Studio</div>
+      <div class="nav-item active" onclick="navigate('dashboard')">Dashboard</div>
+      <div class="nav-section">Talent</div>
+      <div class="nav-item" onclick="navigate('actors')">Actors</div>
+      <div class="nav-item" onclick="navigate('directors')">Directors</div>
+      <div class="nav-section">Projects</div>
+      <div class="nav-item" onclick="navigate('create-project')">New Project</div>
+      <div class="nav-item" onclick="navigate('projects')">Active Projects</div>
+    </div>
+    <div id="content">
+      <!-- content rendered here -->
+    </div>
+  </div>
+</div>
+
+<script>
+
+// ============================================================
+// GAME DATA & CONSTANTS
+// ============================================================
+
+const GENRES = ["Action","Animation","Comedy","Crime","Drama","Fantasy","Historical","Horror","Romance","Sci-Fi","Superhero","Thriller","Western"];
+
+const TONES = ["Cold","Dark","Earnest","Epic","Gritty","Grounded","Intimate","Playful","Sincere","Stylized","Surreal","Tense","Warm","Whimsical"];
+
+const SCOPE_LABELS = ["Low","Mid","High"];
+
+const CAST_SIZE_LABELS = ["Intimate","Standard","Large"];
+
+// Role minimums [leads, supporting, minor] per genre per cast size (0=Intimate,1=Standard,2=Large)
+const ROLE_MINIMUMS = {
+  "Action":     [[1,3,0],[1,4,1],[2,5,2]],
+  "Animation":  [[1,3,0],[2,3,1],[3,4,2]],
+  "Comedy":     [[1,3,0],[2,3,0],[3,4,1]],
+  "Crime":      [[1,3,0],[2,3,1],[3,4,2]],
+  "Drama":      [[1,3,0],[2,3,0],[3,4,1]],
+  "Fantasy":    [[1,3,0],[2,4,1],[3,5,3]],
+  "Historical": [[1,3,0],[2,4,2],[3,5,4]],
+  "Horror":     [[1,3,0],[1,4,1],[2,4,2]],
+  "Romance":    [[2,2,0],[2,3,1],[2,4,2]],
+  "Sci-Fi":     [[1,3,0],[1,4,1],[2,5,2]],
+  "Superhero":  [[1,3,0],[1,4,1],[2,5,2]],
+  "Thriller":   [[1,3,0],[1,4,1],[2,4,2]],
+  "Western":    [[1,3,0],[2,3,1],[2,4,2]],
+};
+
+// Scope cost modifiers per genre
+const SCOPE_COST_MOD = {
+  "Romance":0.7,"Drama":0.75,"Horror":0.8,"Comedy":0.85,
+  "Western":0.9,"Crime":0.9,"Thriller":0.95,"Animation":1.1,
+  "Sci-Fi":1.2,"Historical":1.2,"Fantasy":1.3,"Action":1.3,"Superhero":1.5
+};
+
+// Scope baseline shoot weeks [min, max]
+const SCOPE_WEEKS = { "Low":[4,6], "Mid":[7,10], "High":[11,16] };
+
+// All possible actor traits
+const ACTOR_TRAITS = {
+  // Performance
+  "Method Actor":      { cat:"performance", color:"badge-red",    desc:"High risk/reward. May boost performance or disrupt set morale." },
+  "One-Take Wonder":   { cat:"performance", color:"badge-green",  desc:"Consistently nails scenes quickly. Boosts shoot smoothness." },
+  "Slow Burner":       { cat:"performance", color:"badge-yellow", desc:"Needs many takes. Hurts smoothness but raises performance ceiling." },
+  "Versatile":         { cat:"performance", color:"badge-blue",   desc:"No genre preferences or restrictions. Works in anything." },
+  "Physically Committed":{ cat:"performance", color:"badge-purple", desc:"Boosts physicality contributions. Does own stunts. Tom Cruise trait." },
+  "Inconsistent":      { cat:"performance", color:"badge-yellow", desc:"High variance on performance. Could be transcendent or sleepwalk." },
+  "Substance Abuse":   { cat:"performance", color:"badge-red",    desc:"Random performance penalty. No-show risk. Negative morale effect." },
+  // Personality
+  "Diva":              { cat:"personality", color:"badge-red",    desc:"High demands, renegotiation likely, may lower morale. Box office draw." },
+  "Humble":            { cat:"personality", color:"badge-green",  desc:"Easy to negotiate. Boosts morale. Keanu Reeves trait." },
+  "Workhorse":         { cat:"personality", color:"badge-blue",   desc:"Wants to work constantly. Comfortable with long deals." },
+  "Selective":         { cat:"personality", color:"badge-purple", desc:"Resists long deals. Only works with reputable studios." },
+  "Professional":      { cat:"personality", color:"badge-green",  desc:"Boosts shoot smoothness and set morale consistently." },
+  "Difficult":         { cat:"personality", color:"badge-yellow", desc:"High standards. Only tolerates professional productions. Bale trait." },
+  "Mentor":            { cat:"personality", color:"badge-blue",   desc:"Elevates performance of less experienced cast members." },
+  "High Maintenance":  { cat:"personality", color:"badge-yellow", desc:"Requires good amenities. Demands them in negotiation." },
+  "Low Maintenance":   { cat:"personality", color:"badge-green",  desc:"Happy with anything. Never complains. Easy to work with." },
+  "Scandal Prone":     { cat:"personality", color:"badge-red",    desc:"More likely to generate off-set drama and news." },
+  "Teflon":            { cat:"personality", color:"badge-gray",   desc:"Scandals don't stick. Public forgives them quickly." },
+  // Career
+  "Financially Motivated":{ cat:"career",  color:"badge-yellow", desc:"Only cares about the payday. Works for anyone who pays enough." },
+  "Art Focused":       { cat:"career",     color:"badge-purple", desc:"Prioritizes quality projects. Will take less for the right film." },
+  "Controversial Figure":{ cat:"career",   color:"badge-red",    desc:"Adds major variance to public reception. Johnny Depp trait." },
+  // Media
+  "Controversy Magnet":{ cat:"media",      color:"badge-red",    desc:"High variance on press events. Great or disaster, rarely average." },
+  "Social Media Presence":{ cat:"media",   color:"badge-blue",   desc:"Passive marketing boost on any project they're attached to." },
+  "Private Person":    { cat:"media",      color:"badge-gray",   desc:"Refuses all media. Won't sign without opting out of press." },
+  "Media Darling":     { cat:"media",      color:"badge-green",  desc:"Always wants press. Pushes for media clauses in contracts." },
+};
+
+// All possible director traits
+const DIRECTOR_TRAITS = {
+  "Auteur":            { color:"badge-purple", desc:"Unmistakable style. High variance on audience reception. Snyder trait." },
+  "Chameleon":         { color:"badge-blue",   desc:"Adapts to any project. No strong signature. Versatile across genres." },
+  "Passion Project Prone":{ color:"badge-yellow", desc:"Frequently approaches studio with their own creative ideas." },
+  "Company Man":       { color:"badge-green",  desc:"Takes multi-project deals. Doesn't care about creative control." },
+  "Free-Spirited":     { color:"badge-purple", desc:"High sabbatical chance. Only directs when mood strikes. Malick trait." },
+  "Perfectionist":     { color:"badge-yellow", desc:"Reshoots likely. Production runs long. Kubrick/Fincher trait." },
+  "Efficient":         { color:"badge-green",  desc:"Rarely has delays. Reliable schedule adherence." },
+  "Collaborative":     { color:"badge-green",  desc:"Less likely to demand creative control. Boosts actor morale." },
+  "Control Freak":     { color:"badge-red",    desc:"Demands creative control. Resents studio interference." },
+  "Ego Driven":        { color:"badge-red",    desc:"Difficult to work with. Clashes with studio and cast." },
+  "Difficult":         { color:"badge-yellow", desc:"High standards. Low tolerance for chaos on set." },
+  "Cinema Purist":     { color:"badge-purple", desc:"Only works with high Critical Prestige studios. Refuses blockbusters." },
+  "Blockbuster Artist":{ color:"badge-blue",   desc:"Drawn to big budgets. Wants the blockbuster label." },
+  "Substance Abuse":   { color:"badge-red",    desc:"Performance variance. Delay risk. Morale effect." },
+};
+
+// ============================================================
+// TEST TALENT DATA
+// ============================================================
+
+const TEST_ACTORS = [
+  {
+    id:"a01", type:"actor", name:"Marcus Hale", age:34, peakAge:32,
+    skills:{ charisma:5, range:4, presence:5, physicality:3, characterWork:3, looks:4, starPower:5, mediaPerformance:4 },
+    traits:["Professional","Media Darling"],
+    genrePreference:["Action","Thriller"], genreDislike:["Comedy"],
+    specialization:null,
+    reputation:88, relevance:82,
+    careerFilms:[], awards:[],
+  },
+  {
+    id:"a02", type:"actor", name:"Sophia Vance", age:29, peakAge:31,
+    skills:{ charisma:4, range:5, presence:4, physicality:2, characterWork:5, looks:5, starPower:4, mediaPerformance:3 },
+    traits:["Art Focused","Selective"],
+    genrePreference:["Drama","Romance"], genreDislike:["Action"],
+    specialization:null,
+    reputation:79, relevance:90,
+    careerFilms:[], awards:[],
+  },
+  {
+    id:"a03", type:"actor", name:"Derek Stone", age:42, peakAge:38,
+    skills:{ charisma:3, range:5, presence:5, physicality:2, characterWork:5, looks:3, starPower:4, mediaPerformance:2 },
+    traits:["Method Actor","Private Person","Difficult"],
+    genrePreference:["Drama","Crime"], genreDislike:["Comedy","Animation"],
+    specialization:null,
+    reputation:91, relevance:65,
+    careerFilms:[], awards:["Best Actor","Best Actor"],
+  },
+  {
+    id:"a04", type:"actor", name:"Zara Flynn", age:26, peakAge:30,
+    skills:{ charisma:5, range:3, presence:3, physicality:4, characterWork:2, looks:5, starPower:3, mediaPerformance:5 },
+    traits:["Media Darling","Diva","Social Media Presence"],
+    genrePreference:["Romance","Comedy"], genreDislike:["Horror"],
+    specialization:null,
+    reputation:62, relevance:88,
+    careerFilms:[], awards:[],
+  },
+  {
+    id:"a05", type:"actor", name:"Rex Morrow", age:38, peakAge:36,
+    skills:{ charisma:3, range:2, presence:4, physicality:5, characterWork:2, looks:4, starPower:4, mediaPerformance:3 },
+    traits:["Physically Committed","Workhorse","Financially Motivated"],
+    genrePreference:["Action"], genreDislike:["Drama","Romance"],
+    specialization:"Action",
+    reputation:72, relevance:70,
+    careerFilms:[], awards:[],
+  },
+  {
+    id:"a06", type:"actor", name:"Celeste Moon", age:31, peakAge:33,
+    skills:{ charisma:5, range:4, presence:3, physicality:2, characterWork:4, looks:4, starPower:3, mediaPerformance:4 },
+    traits:["Humble","Professional","Mentor"],
+    genrePreference:["Comedy","Drama"], genreDislike:[],
+    specialization:null,
+    reputation:75, relevance:78,
+    careerFilms:[], awards:["Best Actress"],
+  },
+  {
+    id:"a07", type:"actor", name:"Ivan Cross", age:45, peakAge:40,
+    skills:{ charisma:4, range:3, presence:5, physicality:4, characterWork:3, looks:3, starPower:5, mediaPerformance:3 },
+    traits:["Scandal Prone","Controversial Figure","Diva"],
+    genrePreference:["Action","Crime"], genreDislike:[],
+    specialization:null,
+    reputation:60, relevance:58,
+    careerFilms:[], awards:["Best Actor"],
+  },
+  {
+    id:"a08", type:"actor", name:"Nina Cho", age:24, peakAge:29,
+    skills:{ charisma:4, range:4, presence:2, physicality:3, characterWork:4, looks:5, starPower:2, mediaPerformance:4 },
+    traits:["One-Take Wonder","Low Maintenance"],
+    genrePreference:["Thriller","Drama"], genreDislike:[],
+    specialization:null,
+    reputation:45, relevance:55,
+    careerFilms:[], awards:[],
+  },
+  {
+    id:"a09", type:"actor", name:"Bo Dalton", age:52, peakAge:44,
+    skills:{ charisma:4, range:5, presence:4, physicality:2, characterWork:5, looks:2, starPower:4, mediaPerformance:3 },
+    traits:["Workhorse","Professional","Mentor"],
+    genrePreference:["Crime","Drama","Historical"], genreDislike:[],
+    specialization:null,
+    reputation:84, relevance:55,
+    careerFilms:[], awards:["Best Supporting Actor","Best Actor"],
+  },
+  {
+    id:"a10", type:"actor", name:"Lyra Banks", age:33, peakAge:34,
+    skills:{ charisma:3, range:5, presence:3, physicality:5, characterWork:4, looks:3, starPower:3, mediaPerformance:2 },
+    traits:["Physically Committed","Method Actor","Substance Abuse"],
+    genrePreference:["Action","Horror","Thriller"], genreDislike:["Comedy","Romance"],
+    specialization:null,
+    reputation:68, relevance:72,
+    careerFilms:[], awards:[],
+  },
+  {
+    id:"a11", type:"actor", name:"Theo Park", age:28, peakAge:32,
+    skills:{ charisma:5, range:3, presence:4, physicality:3, characterWork:2, looks:5, starPower:4, mediaPerformance:5 },
+    traits:["Social Media Presence","Media Darling","Inconsistent"],
+    genrePreference:["Comedy","Romance","Superhero"], genreDislike:[],
+    specialization:null,
+    reputation:66, relevance:92,
+    careerFilms:[], awards:[],
+  },
+  {
+    id:"a12", type:"actor", name:"Grace Adler", age:36, peakAge:35,
+    skills:{ charisma:4, range:4, presence:4, physicality:3, characterWork:5, looks:4, starPower:4, mediaPerformance:3 },
+    traits:["Art Focused","Selective","Difficult"],
+    genrePreference:["Drama","Historical","Crime"], genreDislike:["Superhero","Animation"],
+    specialization:null,
+    reputation:82, relevance:74,
+    careerFilms:[], awards:["Best Actress","Best Actress"],
+  },
+  {
+    id:"a13", type:"actor", name:"Sam Vega", age:22, peakAge:27,
+    skills:{ charisma:3, range:2, presence:2, physicality:4, characterWork:2, looks:4, starPower:1, mediaPerformance:3 },
+    traits:["Workhorse","Low Maintenance"],
+    genrePreference:["Action","Horror"], genreDislike:[],
+    specialization:null,
+    reputation:22, relevance:30,
+    careerFilms:[], awards:[],
+  },
+  {
+    id:"a14", type:"actor", name:"Donna Ray", age:48, peakAge:42,
+    skills:{ charisma:5, range:3, presence:4, physicality:2, characterWork:3, looks:3, starPower:4, mediaPerformance:5 },
+    traits:["Financially Motivated","Workhorse","Controversy Magnet"],
+    genrePreference:["Comedy","Action"], genreDislike:["Historical"],
+    specialization:null,
+    reputation:70, relevance:52,
+    careerFilms:[], awards:[],
+  },
+  {
+    id:"a15", type:"actor", name:"Finn O'Brien", age:39, peakAge:37,
+    skills:{ charisma:2, range:5, presence:5, physicality:2, characterWork:5, looks:2, starPower:3, mediaPerformance:2 },
+    traits:["Method Actor","Difficult","Private Person","Art Focused"],
+    genrePreference:["Drama","Crime","Western"], genreDislike:["Superhero","Animation","Comedy"],
+    specialization:null,
+    reputation:88, relevance:60,
+    careerFilms:[], awards:["Best Actor"],
+  },
+  {
+    id:"a16", type:"actor", name:"Mia Torres", age:27, peakAge:30,
+    skills:{ charisma:4, range:4, presence:3, physicality:4, characterWork:3, looks:5, starPower:3, mediaPerformance:4 },
+    traits:["Humble","Versatile"],
+    genrePreference:[], genreDislike:[],
+    specialization:null,
+    reputation:55, relevance:68,
+    careerFilms:[], awards:[],
+  },
+  {
+    id:"a17", type:"actor", name:"Clint Rowe", age:44, peakAge:40,
+    skills:{ charisma:3, range:2, presence:5, physicality:5, characterWork:2, looks:3, starPower:4, mediaPerformance:2 },
+    traits:["Physically Committed","Workhorse","High Maintenance"],
+    genrePreference:["Action","Western","Thriller"], genreDislike:["Romance","Comedy"],
+    specialization:null,
+    reputation:74, relevance:61,
+    careerFilms:[], awards:[],
+  },
+  {
+    id:"a18", type:"actor", name:"Pearl Nakamura", age:31, peakAge:33,
+    skills:{ charisma:5, range:4, presence:3, physicality:2, characterWork:5, looks:4, starPower:3, mediaPerformance:5 },
+    traits:["Professional","Media Darling","One-Take Wonder"],
+    genrePreference:["Drama","Comedy","Romance"], genreDislike:[],
+    specialization:null,
+    reputation:68, relevance:76,
+    careerFilms:[], awards:[],
+  },
+  {
+    id:"a19", type:"actor", name:"Jack Holt", age:57, peakAge:45,
+    skills:{ charisma:4, range:4, presence:5, physicality:3, characterWork:4, looks:3, starPower:5, mediaPerformance:3 },
+    traits:["Teflon","Scandal Prone","Financially Motivated"],
+    genrePreference:["Action","Crime","Thriller"], genreDislike:[],
+    specialization:null,
+    reputation:76, relevance:48,
+    careerFilms:[], awards:["Best Actor"],
+  },
+  {
+    id:"a20", type:"actor", name:"Aisha Osei", age:25, peakAge:29,
+    skills:{ charisma:4, range:5, presence:3, physicality:2, characterWork:4, looks:4, starPower:2, mediaPerformance:3 },
+    traits:["Slow Burner","Art Focused"],
+    genrePreference:["Drama","Fantasy","Historical"], genreDislike:[],
+    specialization:null,
+    reputation:38, relevance:50,
+    careerFilms:[], awards:[],
+  },
+];
+
+const TEST_DIRECTORS = [
+  {
+    id:"d01", type:"director", name:"Victor Crane", age:52, peakAge:48,
+    skills:{ vision:5, storytelling:5, visualStyle:4, direction:4, commercialInstinct:3 },
+    traits:["Perfectionist","Cinema Purist","Control Freak"],
+    tones:["Gritty","Cold"],
+    genrePreference:["Crime","Drama","Thriller"], genreDislike:["Animation","Comedy"],
+    specialization:null,
+    reputation:92, relevance:70, starPower:4,
+    careerFilms:[], awards:["Best Director","Best Director"],
+  },
+  {
+    id:"d02", type:"director", name:"Lena Park", age:38, peakAge:40,
+    skills:{ vision:4, storytelling:4, visualStyle:5, direction:4, commercialInstinct:4 },
+    traits:["Collaborative","Blockbuster Artist","Efficient"],
+    tones:["Stylized","Epic"],
+    genrePreference:["Superhero","Action","Sci-Fi"], genreDislike:["Drama"],
+    specialization:null,
+    reputation:80, relevance:88, starPower:3,
+    careerFilms:[], awards:["Best Director"],
+  },
+  {
+    id:"d03", type:"director", name:"Sam Okafor", age:44, peakAge:42,
+    skills:{ vision:5, storytelling:3, visualStyle:5, direction:3, commercialInstinct:2 },
+    traits:["Auteur","Passion Project Prone","Free-Spirited"],
+    tones:["Surreal","Dark"],
+    genrePreference:["Fantasy","Horror","Sci-Fi"], genreDislike:["Comedy","Romance"],
+    specialization:null,
+    reputation:78, relevance:62, starPower:3,
+    careerFilms:[], awards:["Best Director"],
+  },
+  {
+    id:"d04", type:"director", name:"Carol Webb", age:35, peakAge:38,
+    skills:{ vision:3, storytelling:5, visualStyle:3, direction:5, commercialInstinct:4 },
+    traits:["Company Man","Efficient","Collaborative"],
+    tones:["Warm","Sincere"],
+    genrePreference:["Comedy","Drama","Romance"], genreDislike:[],
+    specialization:null,
+    reputation:68, relevance:72, starPower:2,
+    careerFilms:[], awards:[],
+  },
+  {
+    id:"d05", type:"director", name:"Hiro Tanaka", age:48, peakAge:46,
+    skills:{ vision:4, storytelling:4, visualStyle:4, direction:4, commercialInstinct:5 },
+    traits:["Blockbuster Artist","Efficient","Ego Driven"],
+    tones:["Epic","Tense"],
+    genrePreference:["Action","Historical","Fantasy"], genreDislike:["Documentary"],
+    specialization:null,
+    reputation:85, relevance:80, starPower:4,
+    careerFilms:[], awards:["Best Director"],
+  },
+];
+
+// ============================================================
+// GAME STATE
+// ============================================================
+
+let STATE = {
+  week: 1,
+  year: 2000,
+  studioName: "Placeholder Studios",
+  commercialDraw: 30,
+  criticalPrestige: 30,
+  actors: TEST_ACTORS,
+  directors: TEST_DIRECTORS,
+  projects: [],
+  completedFilms: [],
+  currentView: "dashboard",
+  selectedTalentId: null,
+  newProject: null,
+};
+
+// ============================================================
+// SAVE / LOAD
+// ============================================================
+
+function saveGame() {
+  try {
+    localStorage.setItem("he_save", JSON.stringify(STATE));
+  } catch(e) { console.warn("Save failed", e); }
+}
+
+function loadGame() {
+  try {
+    const raw = localStorage.getItem("he_save");
+    if (raw) {
+      const saved = JSON.parse(raw);
+      STATE = { ...STATE, ...saved };
+    }
+  } catch(e) { console.warn("Load failed", e); }
+}
+
+// ============================================================
+// NAVIGATION
+// ============================================================
+
+function navigate(view) {
+  STATE.currentView = view;
+  STATE.selectedTalentId = null;
+  document.querySelectorAll(".nav-item").forEach(el => el.classList.remove("active"));
+  const navMap = {
+    "dashboard":"Dashboard","actors":"Actors","directors":"Directors",
+    "create-project":"New Project","projects":"Active Projects"
+  };
+  document.querySelectorAll(".nav-item").forEach(el => {
+    if (el.textContent.trim() === (navMap[view] || "")) el.classList.add("active");
+  });
+  render();
+  saveGame();
+}
+
+// ============================================================
+// HELPERS
+// ============================================================
+
+function stars(n, max=5) {
+  let s = "";
+  for (let i=0;i<max;i++) s += i<n ? "★" : "☆";
+  return `<span class="stars">${"★".repeat(n)}</span><span class="stars-empty">${"☆".repeat(max-n)}</span>`;
+}
+
+function badge(text, cls="badge-gray") {
+  return `<span class="badge ${cls}">${text}</span>`;
+}
+
+function traitBadge(traitName, isDirector=false) {
+  const pool = isDirector ? DIRECTOR_TRAITS : ACTOR_TRAITS;
+  const t = pool[traitName];
+  if (!t) return badge(traitName);
+  return `<span class="badge ${t.color}" title="${t.desc}">${traitName}</span>`;
+}
+
+function skillBar(val, max=5) {
+  const pct = (val/max)*100;
+  return `<div class="skill-bar"><div class="skill-bar-fill" style="width:${pct}%"></div></div>`;
+}
+
+function getRoleMinimums(genre, castSizeIdx) {
+  const mins = ROLE_MINIMUMS[genre];
+  if (!mins) return [1,3,0];
+  return mins[castSizeIdx] || [1,3,0];
+}
+
+function getAllTalent() {
+  return [...STATE.actors, ...STATE.directors];
+}
+
+function getTalentById(id) {
+  return getAllTalent().find(t => t.id === id);
+}
+
+function getActorById(id) {
+  return STATE.actors.find(a => a.id === id);
+}
+
+function getDirectorById(id) {
+  return STATE.directors.find(d => d.id === id);
+}
+
+function genrePreferenceLabel(actor, genre) {
+  if (actor.specialization === genre) return badge("Specializes", "badge-purple");
+  if (actor.genrePreference && actor.genrePreference.includes(genre)) return badge("Prefers", "badge-green");
+  if (actor.genreDislike && actor.genreDislike.includes(genre)) return badge("Dislikes", "badge-red");
+  return "";
+}
+
+// ============================================================
+// RENDER ENGINE
+// ============================================================
+
+function render() {
+  const content = document.getElementById("content");
+  document.getElementById("studio-info").textContent =
+    `${STATE.studioName}  |  Week ${STATE.week}, Year ${STATE.year}  |  Commercial Draw: ${STATE.commercialDraw}  |  Critical Prestige: ${STATE.criticalPrestige}`;
+
+  switch(STATE.currentView) {
+    case "dashboard":       content.innerHTML = renderDashboard(); break;
+    case "actors":          content.innerHTML = renderTalentList("actor"); break;
+    case "directors":       content.innerHTML = renderTalentList("director"); break;
+    case "talent-detail":   content.innerHTML = renderTalentDetail(); break;
+    case "create-project":  content.innerHTML = renderCreateProject(); break;
+    case "projects":        content.innerHTML = renderProjects(); break;
+    case "project-detail":  content.innerHTML = renderProjectDetail(); break;
+    default:                content.innerHTML = `<div class="empty-state">Page not found.</div>`;
+  }
+}
+
+// ============================================================
+// DASHBOARD
+// ============================================================
+
+function renderDashboard() {
+  const activeProjects = STATE.projects.filter(p => p.status !== "complete");
+  const completedCount = STATE.completedFilms.length;
+
+  return `
+    <div class="page-title">Studio Dashboard</div>
+    <div class="grid-3">
+      <div class="stat-box"><div class="val">${STATE.commercialDraw}</div><div class="lbl">Commercial Draw</div></div>
+      <div class="stat-box"><div class="val">${STATE.criticalPrestige}</div><div class="lbl">Critical Prestige</div></div>
+      <div class="stat-box"><div class="val">${completedCount}</div><div class="lbl">Films Released</div></div>
+    </div>
+
+    <div class="panel" style="margin-top:14px">
+      <div class="panel-title">Active Productions (${activeProjects.length})</div>
+      ${activeProjects.length === 0
+        ? `<div class="empty-state">No active productions. <a href="#" onclick="navigate('create-project');return false;" style="color:#e94560">Create a new project →</a></div>`
+        : activeProjects.map(p => `
+          <div class="role-slot filled" onclick="selectProject('${p.id}')" style="cursor:pointer">
+            <div>
+              <div style="font-weight:bold;color:#e0e0e0">${p.title}</div>
+              <div class="text-muted">${p.genre} · ${SCOPE_LABELS[p.scope]} scope · ${CAST_SIZE_LABELS[p.castSize]} cast · Week ${p.weekStart}</div>
+            </div>
+            <div>${badge(p.status.toUpperCase(), p.status==="casting"?"badge-yellow":"badge-blue")}</div>
+          </div>
+        `).join("")
+      }
+    </div>
+
+    <div class="grid-2">
+      <div class="panel">
+        <div class="panel-title">Talent Roster</div>
+        <div class="skill-row"><span class="skill-name">Actors on file</span><span style="color:#e94560;font-weight:bold">${STATE.actors.length}</span></div>
+        <div class="skill-row"><span class="skill-name">Directors on file</span><span style="color:#e94560;font-weight:bold">${STATE.directors.length}</span></div>
+        <div style="margin-top:10px;display:flex;gap:8px">
+          <button class="btn btn-secondary btn-sm" onclick="navigate('actors')">View Actors</button>
+          <button class="btn btn-secondary btn-sm" onclick="navigate('directors')">View Directors</button>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-title">Quick Actions</div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <button class="btn btn-primary" onclick="navigate('create-project')">＋ New Project</button>
+          <button class="btn btn-secondary" onclick="navigate('projects')">View All Projects</button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+// ============================================================
+// TALENT LIST
+// ============================================================
+
+function renderTalentList(type) {
+  const list = type === "actor" ? STATE.actors : STATE.directors;
+  const title = type === "actor" ? "Actors" : "Directors";
+
+  return `
+    <div class="page-title">${title} <span class="text-muted" style="font-size:14px">(${list.length})</span></div>
+    <div class="panel">
+      <table>
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Age</th>
+            ${type === "actor"
+              ? `<th>Charisma</th><th>Range</th><th>Presence</th><th>Star Power</th>`
+              : `<th>Vision</th><th>Storytelling</th><th>Direction</th><th>Star Power</th>`
+            }
+            <th>Rep</th>
+            <th>Traits</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${list.map(t => `
+            <tr onclick="selectTalent('${t.id}')" ${STATE.selectedTalentId===t.id?'class="selected"':''}>
+              <td><strong>${t.name}</strong></td>
+              <td>${t.age}</td>
+              ${type === "actor"
+                ? `<td>${stars(t.skills.charisma)}</td>
+                   <td>${stars(t.skills.range)}</td>
+                   <td>${stars(t.skills.presence)}</td>
+                   <td>${stars(t.skills.starPower)}</td>`
+                : `<td>${stars(t.skills.vision)}</td>
+                   <td>${stars(t.skills.storytelling)}</td>
+                   <td>${stars(t.skills.direction)}</td>
+                   <td>${stars(t.starPower)}</td>`
+              }
+              <td>${t.reputation}</td>
+              <td>${t.traits.slice(0,2).map(tr => traitBadge(tr, type==="director")).join("")}${t.traits.length>2?`<span class="text-muted"> +${t.traits.length-2}</span>`:""}</td>
+            </tr>
+          `).join("")}
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+
+// ============================================================
+// TALENT DETAIL
+// ============================================================
+
+function selectTalent(id) {
+  STATE.selectedTalentId = id;
+  STATE.currentView = "talent-detail";
+  render();
+}
+
+function renderTalentDetail() {
+  const t = getTalentById(STATE.selectedTalentId);
+  if (!t) return `<div class="empty-state">Talent not found.</div>`;
+
+  const isDirector = t.type === "director";
+  const backView = isDirector ? "directors" : "actors";
+
+  const atPeak = Math.abs(t.age - t.peakAge) <= 2;
+  const pastPeak = t.age > t.peakAge + 5;
+
+  let peakBadge = "";
+  if (atPeak) peakBadge = badge("AT PEAK", "badge-green");
+  else if (pastPeak) peakBadge = badge("PAST PEAK", "badge-yellow");
+  else peakBadge = badge("BUILDING", "badge-blue");
+
+  const awardsHtml = t.awards.length > 0
+    ? t.awards.map(a => `<span class="badge badge-yellow">🏆 ${a}</span>`).join(" ")
+    : `<span class="text-muted">No awards yet</span>`;
+
+  const skillsHtml = isDirector
+    ? renderDirectorSkills(t)
+    : renderActorSkills(t);
+
+  const prefsHtml = (() => {
+    if (t.traits.includes("Versatile")) return badge("Versatile — works any genre", "badge-blue");
+    let html = "";
+    if (t.specialization) html += `<div style="margin-bottom:6px">${badge("Specialist: " + t.specialization, "badge-purple")}</div>`;
+    if (t.genrePreference && t.genrePreference.length > 0)
+      html += t.genrePreference.map(g => badge("Prefers: "+g, "badge-green")).join(" ");
+    if (t.genreDislike && t.genreDislike.length > 0)
+      html += " " + t.genreDislike.map(g => badge("Dislikes: "+g, "badge-red")).join(" ");
+    return html || `<span class="text-muted">No strong preferences</span>`;
+  })();
+
+  const tonesHtml = isDirector && t.tones
+    ? t.tones.map(tone => badge(tone, "badge-purple")).join(" ")
+    : null;
+
+  return `
+    <div style="margin-bottom:12px">
+      <button class="btn btn-secondary btn-sm" onclick="navigate('${backView}')">← Back</button>
+    </div>
+
+    <div class="panel">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px">
+        <div>
+          <div style="font-size:22px;font-weight:bold;color:#e0e0e0">${t.name}</div>
+          <div class="text-muted" style="margin-top:4px">
+            ${isDirector ? "Director" : "Actor"} · Age ${t.age} · Peak age ~${t.peakAge}
+          </div>
+        </div>
+        <div style="text-align:right">${peakBadge}</div>
+      </div>
+    </div>
+
+    <div class="detail-grid-3">
+      <div class="stat-box"><div class="val">${t.reputation}</div><div class="lbl">Reputation</div></div>
+      <div class="stat-box"><div class="val">${t.relevance}</div><div class="lbl">Relevance</div></div>
+      <div class="stat-box"><div class="val">${t.awards.length}</div><div class="lbl">Awards</div></div>
+    </div>
+
+    <div class="grid-2" style="margin-top:14px">
+      <div class="panel">
+        <div class="panel-title">Skills</div>
+        ${skillsHtml}
+      </div>
+      <div class="panel">
+        <div class="panel-title">Traits</div>
+        <div style="display:flex;flex-wrap:wrap;gap:4px">
+          ${t.traits.map(tr => traitBadge(tr, isDirector)).join("")}
+        </div>
+        ${t.traits.length === 0 ? `<div class="text-muted">No notable traits</div>` : ""}
+
+        <hr class="divider">
+        <div class="panel-title">Genre Preferences</div>
+        <div>${prefsHtml}</div>
+
+        ${tonesHtml ? `<hr class="divider"><div class="panel-title">Director Tones</div><div>${tonesHtml}</div>` : ""}
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">Awards</div>
+      ${awardsHtml}
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">Career Films</div>
+      ${t.careerFilms.length === 0
+        ? `<div class="empty-state">No films on record yet.</div>`
+        : `<table>
+            <thead><tr><th>Title</th><th>Year</th><th>Role</th><th>Quality</th></tr></thead>
+            <tbody>
+              ${t.careerFilms.map(f => `
+                <tr>
+                  <td>${f.title}</td><td>${f.year}</td>
+                  <td>${f.role || "—"}</td>
+                  <td style="color:${f.quality>=70?"#40c060":f.quality>=50?"#c0a020":"#e94560"}">${f.quality}/100</td>
+                </tr>
+              `).join("")}
+            </tbody>
+          </table>`
+      }
+    </div>
+  `;
+}
+
+function renderActorSkills(a) {
+  const skills = [
+    ["Charisma",         a.skills.charisma],
+    ["Range",            a.skills.range],
+    ["Presence",         a.skills.presence],
+    ["Physicality",      a.skills.physicality],
+    ["Character Work",   a.skills.characterWork],
+    ["Looks",            a.skills.looks],
+    ["Star Power",       a.skills.starPower],
+    ["Media Performance",a.skills.mediaPerformance],
+  ];
+  return skills.map(([name, val]) => `
+    <div class="skill-row">
+      <span class="skill-name">${name}</span>
+      <div class="skill-bar-wrap">
+        ${skillBar(val)}
+        <span style="font-size:12px;color:#e94560;width:14px;text-align:right">${val}</span>
+      </div>
+    </div>
+  `).join("");
+}
+
+function renderDirectorSkills(d) {
+  const skills = [
+    ["Vision",             d.skills.vision],
+    ["Storytelling",       d.skills.storytelling],
+    ["Visual Style",       d.skills.visualStyle],
+    ["Direction",          d.skills.direction],
+    ["Commercial Instinct",d.skills.commercialInstinct],
+    ["Star Power",         d.starPower],
+  ];
+  return skills.map(([name, val]) => `
+    <div class="skill-row">
+      <span class="skill-name">${name}</span>
+      <div class="skill-bar-wrap">
+        ${skillBar(val)}
+        <span style="font-size:12px;color:#e94560;width:14px;text-align:right">${val}</span>
+      </div>
+    </div>
+  `).join("");
+}
+
+// ============================================================
+// CREATE PROJECT
+// ============================================================
+
+function renderCreateProject() {
+  if (!STATE.newProject) {
+    STATE.newProject = {
+      title: "",
+      genre: "Drama",
+      castSize: 1,
+      scope: 1,
+      directorId: null,
+      roles: [],
+      status: "setup",
+      id: "proj_" + Date.now(),
+      weekStart: STATE.week,
+      year: STATE.year,
+    };
+  }
+  const p = STATE.newProject;
+  const mins = getRoleMinimums(p.genre, p.castSize);
+  const [minLeads, minSupporting, minMinor] = mins;
+
+  const scopeMod = SCOPE_COST_MOD[p.genre] || 1.0;
+  const weeksRange = SCOPE_WEEKS[SCOPE_LABELS[p.scope]];
+  const selectedDirector = p.directorId ? getDirectorById(p.directorId) : null;
+
+  return `
+    <div class="page-title">New Project — Week 1: Concept & Direction</div>
+
+    <div class="grid-2">
+      <div>
+        <div class="panel">
+          <div class="panel-title">Project Details</div>
+
+          <label>Project Title</label>
+          <input type="text" id="proj-title" value="${p.title}" placeholder="Enter title..." oninput="updateProjectField('title', this.value)">
+
+          <label>Genre</label>
+          <select id="proj-genre" onchange="updateProjectField('genre', this.value)">
+            ${GENRES.map(g => `<option value="${g}" ${g===p.genre?"selected":""}>${g}</option>`).join("")}
+          </select>
+
+          <label>Cast Size</label>
+          <select id="proj-cast" onchange="updateProjectField('castSize', parseInt(this.value))">
+            ${CAST_SIZE_LABELS.map((l,i) => `<option value="${i}" ${i===p.castSize?"selected":""}>${l}</option>`).join("")}
+          </select>
+
+          <label>Production Scope</label>
+          <select id="proj-scope" onchange="updateProjectField('scope', parseInt(this.value))">
+            ${SCOPE_LABELS.map((l,i) => `<option value="${i}" ${i===p.scope?"selected":""}>${l}</option>`).join("")}
+          </select>
+
+          <div style="margin-top:14px;background:#0f1a30;border:1px solid #0f3460;border-radius:3px;padding:12px">
+            <div class="text-muted" style="margin-bottom:6px">Production estimates</div>
+            <div class="skill-row"><span class="skill-name">Scope cost modifier</span><span style="color:#c0a020">×${scopeMod.toFixed(2)}</span></div>
+            <div class="skill-row"><span class="skill-name">Estimated shoot length</span><span style="color:#c0a020">${weeksRange[0]}–${weeksRange[1]} weeks</span></div>
+            <div class="skill-row"><span class="skill-name">Min leads required</span><span style="color:#e94560">${minLeads}</span></div>
+            <div class="skill-row"><span class="skill-name">Min supporting required</span><span style="color:#e94560">${minSupporting}</span></div>
+            <div class="skill-row"><span class="skill-name">Min minor required</span><span style="color:#e94560">${minMinor}</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="panel">
+          <div class="panel-title">Assign Director ${selectedDirector ? "✓" : ""}</div>
+          ${STATE.directors.map(d => `
+            <div class="role-slot ${p.directorId===d.id?"filled":"empty"}" onclick="updateProjectField('directorId','${d.id}')" style="cursor:pointer;margin-bottom:6px">
+              <div>
+                <div style="font-weight:bold;color:#e0e0e0">${d.name}</div>
+                <div class="text-muted">${d.tones.join(", ")} · Rep ${d.reputation}</div>
+                <div style="margin-top:4px">${d.traits.slice(0,2).map(tr=>traitBadge(tr,true)).join("")}</div>
+                <div style="margin-top:3px">${genrePreferenceLabel(d, p.genre)}</div>
+              </div>
+              <div>${stars(d.skills.vision, 5)}</div>
+            </div>
+          `).join("")}
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:10px;margin-top:4px">
+      <button class="btn btn-primary" onclick="proceedToCasting()" ${!p.title||!p.directorId?"disabled style='opacity:0.4'":""}>
+        Proceed to Casting →
+      </button>
+      <button class="btn btn-secondary" onclick="cancelNewProject()">Cancel</button>
+    </div>
+    ${!p.title ? `<div class="text-muted" style="margin-top:8px">⚠ Enter a project title</div>` : ""}
+    ${!p.directorId ? `<div class="text-muted" style="margin-top:4px">⚠ Assign a director</div>` : ""}
+  `;
+}
+
+function updateProjectField(field, value) {
+  if (!STATE.newProject) return;
+  STATE.newProject[field] = value;
+  if (field === "genre" || field === "castSize" || field === "scope") {
+    STATE.newProject.roles = [];
+  }
+  render();
+}
+
+function cancelNewProject() {
+  STATE.newProject = null;
+  navigate("dashboard");
+}
+
+// ============================================================
+// CASTING
+// ============================================================
+
+function proceedToCasting() {
+  const p = STATE.newProject;
+  if (!p.title || !p.directorId) return;
+  const mins = getRoleMinimums(p.genre, p.castSize);
+  const [minLeads, minSupporting, minMinor] = mins;
+  p.roles = [];
+  for (let i=0;i<minLeads;i++) p.roles.push({ type:"lead", actorId:null, index:i+1 });
+  for (let i=0;i<minSupporting;i++) p.roles.push({ type:"supporting", actorId:null, index:i+1 });
+  for (let i=0;i<minMinor;i++) p.roles.push({ type:"minor", actorId:null, index:i+1 });
+  p.status = "casting";
+  STATE.currentView = "project-detail";
+  render();
+}
+
+function renderCasting(p) {
+  const assignedIds = p.roles.map(r => r.actorId).filter(Boolean);
+  const director = getDirectorById(p.directorId);
+  const mins = getRoleMinimums(p.genre, p.castSize);
+  const [minLeads, minSupporting, minMinor] = mins;
+
+  const filledLeads = p.roles.filter(r=>r.type==="lead"&&r.actorId).length;
+  const filledSupporting = p.roles.filter(r=>r.type==="supporting"&&r.actorId).length;
+  const filledMinor = p.roles.filter(r=>r.type==="minor"&&r.actorId).length;
+  const allFilled = filledLeads>=minLeads && filledSupporting>=minSupporting && (minMinor===0||filledMinor>=minMinor);
+
+  return `
+    <div style="margin-bottom:12px">
+      <button class="btn btn-secondary btn-sm" onclick="navigate('projects')">← Projects</button>
+    </div>
+    <div class="page-title">${p.title} — Week 2: Casting</div>
+
+    <div class="grid-2">
+      <div>
+        <div class="panel">
+          <div class="panel-title">Project Info</div>
+          <div class="skill-row"><span class="skill-name">Genre</span><span>${p.genre}</span></div>
+          <div class="skill-row"><span class="skill-name">Cast Size</span><span>${CAST_SIZE_LABELS[p.castSize]}</span></div>
+          <div class="skill-row"><span class="skill-name">Scope</span><span>${SCOPE_LABELS[p.scope]}</span></div>
+          <div class="skill-row"><span class="skill-name">Director</span><span style="color:#e94560">${director ? director.name : "—"}</span></div>
+          ${director ? `<div style="margin-top:4px">${director.tones.map(t=>badge(t,"badge-purple")).join(" ")}</div>` : ""}
+        </div>
+
+        <div class="panel">
+          <div class="panel-title">Role Slots</div>
+          ${p.roles.map((role, idx) => {
+            const actor = role.actorId ? getActorById(role.actorId) : null;
+            return `
+              <div class="role-slot ${actor?"filled":"empty"}" style="margin-bottom:6px">
+                <div>
+                  <div class="role-type">${role.type} #${role.index}</div>
+                  <div class="role-actor">${actor ? actor.name : `<span class="text-muted">— Empty —</span>`}</div>
+                  ${actor ? `<div style="margin-top:3px">${genrePreferenceLabel(actor, p.genre)}</div>` : ""}
+                </div>
+                <div style="display:flex;gap:6px;align-items:center">
+                  ${actor
+                    ? `<button class="btn btn-secondary btn-sm" onclick="uncastRole(${idx})">Remove</button>`
+                    : ""
+                  }
+                </div>
+              </div>
+            `;
+          }).join("")}
+
+          <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">
+            <button class="btn btn-secondary btn-sm" onclick="addOptionalRole('lead')" ${p.roles.filter(r=>r.type==="lead").length>=3?"disabled style='opacity:0.4'":""}>+ Add Lead</button>
+            <button class="btn btn-secondary btn-sm" onclick="addOptionalRole('supporting')" ${p.roles.filter(r=>r.type==="supporting").length>=6?"disabled style='opacity:0.4'":""}>+ Add Supporting</button>
+            <button class="btn btn-secondary btn-sm" onclick="addOptionalRole('minor')" ${p.roles.filter(r=>r.type==="minor").length>=4?"disabled style='opacity:0.4'":""}>+ Add Minor</button>
+            <button class="btn btn-secondary btn-sm" onclick="addOptionalRole('cameo')">+ Add Cameo</button>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:10px;margin-top:4px">
+          <button class="btn btn-success" onclick="greenlightProject()" ${allFilled?"":"disabled style='opacity:0.4'"}>
+            🎬 Greenlight Production
+          </button>
+        </div>
+        ${!allFilled ? `<div class="text-muted" style="margin-top:6px">⚠ Fill all required roles to greenlight</div>` : ""}
+      </div>
+
+      <div>
+        <div class="panel">
+          <div class="panel-title">Available Actors</div>
+          <table>
+            <thead>
+              <tr><th>Name</th><th>Charisma</th><th>Range</th><th>Star Power</th><th>Fit</th><th></th></tr>
+            </thead>
+            <tbody>
+              ${STATE.actors.map(a => {
+                const alreadyCast = assignedIds.includes(a.id);
+                const emptySlots = p.roles.filter(r=>!r.actorId);
+                return `
+                  <tr style="${alreadyCast?"opacity:0.4":""}">
+                    <td><strong>${a.name}</strong><br><span class="text-muted">${a.age}yo · Rep ${a.reputation}</span></td>
+                    <td>${stars(a.skills.charisma)}</td>
+                    <td>${stars(a.skills.range)}</td>
+                    <td>${stars(a.skills.starPower)}</td>
+                    <td>${genrePreferenceLabel(a, p.genre)}</td>
+                    <td>
+                      ${!alreadyCast && emptySlots.length > 0
+                        ? `<select onchange="castActorToRole('${a.id}', parseInt(this.value))" style="width:auto;padding:4px;font-size:11px">
+                            <option value="-1">Cast as...</option>
+                            ${emptySlots.map((slot, i) => {
+                              const realIdx = p.roles.indexOf(slot);
+                              return `<option value="${realIdx}">${slot.type} #${slot.index}</option>`;
+                            }).join("")}
+                          </select>`
+                        : alreadyCast
+                          ? `<span class="text-muted">Cast</span>`
+                          : `<span class="text-muted">No slots</span>`
+                      }
+                    </td>
+                  </tr>
+                `;
+              }).join("")}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function castActorToRole(actorId, roleIdx) {
+  const p = STATE.newProject || STATE.projects.find(pr => pr.status === "casting");
+  if (!p || roleIdx < 0 || roleIdx >= p.roles.length) return;
+  p.roles[roleIdx].actorId = actorId;
+  render();
+}
+
+function uncastRole(roleIdx) {
+  const p = STATE.newProject || STATE.projects.find(pr => pr.status === "casting");
+  if (!p) return;
+  p.roles[roleIdx].actorId = null;
+  render();
+}
+
+function addOptionalRole(type) {
+  const p = STATE.newProject;
+  if (!p) return;
+  const existing = p.roles.filter(r => r.type === type);
+  const maxes = { lead:3, supporting:6, minor:4, cameo:99 };
+  if ((existing.length) >= (maxes[type]||99)) return;
+  p.roles.push({ type, actorId:null, index: existing.length + 1 });
+  render();
+}
+
+// ============================================================
+// PRODUCTION SIMULATION (simplified)
+// ============================================================
+
+function greenlightProject() {
+  const p = STATE.newProject;
+  if (!p) return;
+  const mins = getRoleMinimums(p.genre, p.castSize);
+  const filledLeads = p.roles.filter(r=>r.type==="lead"&&r.actorId).length;
+  const filledSupporting = p.roles.filter(r=>r.type==="supporting"&&r.actorId).length;
+  const filledMinor = p.roles.filter(r=>r.type==="minor"&&r.actorId).length;
+  if (filledLeads < mins[0] || filledSupporting < mins[1] || (mins[2]>0 && filledMinor<mins[2])) return;
+
+  const weeksRange = SCOPE_WEEKS[SCOPE_LABELS[p.scope]];
+  p.shootWeeks = weeksRange[0] + Math.floor(Math.random() * (weeksRange[1] - weeksRange[0] + 1));
+  p.weeksElapsed = 0;
+  p.status = "production";
+  p.turmoil = 0;
+  STATE.projects.push(p);
+  STATE.newProject = null;
+  STATE.currentView = "project-detail";
+  STATE.selectedProjectId = p.id;
+  render();
+  saveGame();
+}
+
+function selectProject(id) {
+  STATE.selectedProjectId = id;
+  STATE.currentView = "project-detail";
+  render();
+}
+
+function renderProjects() {
+  if (STATE.projects.length === 0) {
+    return `
+      <div class="page-title">Active Projects</div>
+      <div class="panel">
+        <div class="empty-state">No projects yet. <a href="#" onclick="navigate('create-project');return false;" style="color:#e94560">Create one →</a></div>
+      </div>
+    `;
+  }
+  return `
+    <div class="page-title">Active Projects</div>
+    <div class="panel">
+      ${STATE.projects.map(p => `
+        <div class="role-slot ${p.status==="complete"?"":"filled"}" onclick="selectProject('${p.id}')" style="cursor:pointer;margin-bottom:8px">
+          <div>
+            <div style="font-weight:bold;color:#e0e0e0">${p.title}</div>
+            <div class="text-muted">${p.genre} · ${SCOPE_LABELS[p.scope]} scope · ${CAST_SIZE_LABELS[p.castSize]} cast</div>
+            ${p.status==="production" ? `<div class="text-muted">Week ${p.weeksElapsed}/${p.shootWeeks} · Turmoil: ${p.turmoil}</div>` : ""}
+          </div>
+          <div>${badge(p.status.toUpperCase(), p.status==="complete"?"badge-green":p.status==="production"?"badge-blue":"badge-yellow")}</div>
+        </div>
+      `).join("")}
+    </div>
+  `;
+}
+
+function renderProjectDetail() {
+  const p = STATE.projects.find(pr => pr.id === STATE.selectedProjectId) || STATE.newProject;
+  if (!p) return `<div class="empty-state">Project not found.</div>`;
+  if (p.status === "casting") return renderCasting(p);
+  if (p.status === "production" || p.status === "complete") return renderProduction(p);
+  return `<div class="empty-state">Unknown project state.</div>`;
+}
+
+function renderProduction(p) {
+  const director = getDirectorById(p.directorId);
+  const isComplete = p.status === "complete";
+  const progressPct = Math.min(100, Math.round((p.weeksElapsed / p.shootWeeks) * 100));
+
+  return `
+    <div style="margin-bottom:12px">
+      <button class="btn btn-secondary btn-sm" onclick="navigate('projects')">← Projects</button>
+    </div>
+    <div class="page-title">${p.title} ${isComplete ? badge("COMPLETE","badge-green") : badge("IN PRODUCTION","badge-blue")}</div>
+
+    <div class="grid-2">
+      <div>
+        <div class="panel">
+          <div class="panel-title">Production Status</div>
+          <div class="skill-row"><span class="skill-name">Genre</span><span>${p.genre}</span></div>
+          <div class="skill-row"><span class="skill-name">Scope</span><span>${SCOPE_LABELS[p.scope]}</span></div>
+          <div class="skill-row"><span class="skill-name">Director</span><span style="color:#e94560">${director ? director.name : "—"}</span></div>
+          <div class="skill-row"><span class="skill-name">Shoot Progress</span><span>${p.weeksElapsed}/${p.shootWeeks} weeks</span></div>
+          <div class="skill-row"><span class="skill-name">Turmoil</span><span style="color:${p.turmoil>20?"#e94560":p.turmoil>10?"#c0a020":"#40c060"}">${p.turmoil}</span></div>
+
+          <div style="margin-top:10px">
+            <div class="text-muted" style="margin-bottom:4px">Shoot progress</div>
+            <div style="background:#0f1a30;border-radius:3px;height:10px;border:1px solid #0f3460">
+              <div style="height:100%;width:${progressPct}%;background:#e94560;border-radius:3px;transition:width 0.3s"></div>
+            </div>
+            <div class="text-muted" style="margin-top:3px">${progressPct}% complete</div>
+          </div>
+
+          ${isComplete && p.scores ? `
+            <hr class="divider">
+            <div class="panel-title">Final Scores</div>
+            <div class="detail-grid-3" style="margin-top:8px">
+              <div class="stat-box">
+                <div class="val" style="color:${p.scores.criticScore>=70?"#40c060":p.scores.criticScore>=50?"#c0a020":"#e94560"}">${p.scores.criticScore}</div>
+                <div class="lbl">Critic Score</div>
+              </div>
+              <div class="stat-box">
+                <div class="val" style="color:${p.scores.publicScore>=70?"#40c060":p.scores.publicScore>=50?"#c0a020":"#e94560"}">${p.scores.publicScore}</div>
+                <div class="lbl">Public Score</div>
+              </div>
+              <div class="stat-box">
+                <div class="val">${p.scores.turmoilPenalty}</div>
+                <div class="lbl">Turmoil Penalty</div>
+              </div>
+            </div>
+          ` : ""}
+
+          ${!isComplete ? `
+            <div style="margin-top:14px">
+              <button class="btn btn-primary" onclick="simulateWeek('${p.id}')">Simulate 1 Week ▶</button>
+            </div>
+          ` : ""}
+        </div>
+      </div>
+
+      <div>
+        <div class="panel">
+          <div class="panel-title">Cast</div>
+          ${p.roles.map(role => {
+            const actor = role.actorId ? getActorById(role.actorId) : null;
+            return `
+              <div class="role-slot ${actor?"filled":"empty"}" style="margin-bottom:6px">
+                <div>
+                  <div class="role-type">${role.type} #${role.index}</div>
+                  <div class="role-actor">${actor ? actor.name : "— Empty —"}</div>
+                  ${actor ? `<div style="margin-top:3px">${stars(actor.skills.charisma)} CHA &nbsp; ${stars(actor.skills.range)} RNG</div>` : ""}
+                </div>
+              </div>
+            `;
+          }).join("")}
+        </div>
+
+        ${p.log && p.log.length > 0 ? `
+          <div class="panel">
+            <div class="panel-title">Production Log</div>
+            ${p.log.slice().reverse().map(entry => `
+              <div style="padding:5px 0;border-bottom:1px solid #0f1a30;font-size:12px;color:${entry.type==="event"?"#c0a020":entry.type==="bad"?"#e94560":"#a0c0a0"}">${entry.text}</div>
+            `).join("")}
+          </div>
+        ` : ""}
+      </div>
+    </div>
+  `;
+}
+
+// ============================================================
+// SIMULATION LOGIC
+// ============================================================
+
+function simulateWeek(projectId) {
+  const p = STATE.projects.find(pr => pr.id === projectId);
+  if (!p || p.status !== "production") return;
+
+  p.weeksElapsed++;
+  if (!p.log) p.log = [];
+
+  // Random event chance
+  if (Math.random() < 0.25) {
+    const event = pickRandomEvent(p);
+    p.log.push(event);
+    p.turmoil += event.turmoilDelta || 0;
+  }
+
+  // Check if shoot is complete
+  if (p.weeksElapsed >= p.shootWeeks) {
+    p.status = "complete";
+    p.scores = calculateScores(p);
+    p.log.push({ text:`🎬 Production wrapped! Critic: ${p.scores.criticScore} · Public: ${p.scores.publicScore}`, type:"good" });
+    updateCareerFilms(p);
+  }
+
+  p.log.push({ text:`Week ${p.weeksElapsed} of ${p.shootWeeks} completed.`, type:"log" });
+  STATE.week++;
+  saveGame();
+  render();
+}
+
+function pickRandomEvent(p) {
+  const events = [
+    { text:"📅 Smooth shoot day. Everything on schedule.", type:"log", turmoilDelta:0 },
+    { text:"⚡ Minor on-set disagreement between cast members.", type:"event", turmoilDelta:3 },
+    { text:"🎭 Actor delivers a standout performance in a key scene.", type:"good", turmoilDelta:0 },
+    { text:"🌧 Weather delay. Production pushed back a day.", type:"event", turmoilDelta:2 },
+    { text:"✨ The crew is firing on all cylinders today.", type:"good", turmoilDelta:-1 },
+    { text:"😤 Tension on set between cast and crew.", type:"bad", turmoilDelta:4 },
+    { text:"📸 Behind the scenes footage leaks online. Buzz increases.", type:"event", turmoilDelta:0 },
+    { text:"🤝 Director and lead have a creative breakthrough.", type:"good", turmoilDelta:-2 },
+  ];
+
+  // Trait-influenced events
+  const director = getDirectorById(p.directorId);
+  if (director && director.traits.includes("Perfectionist") && Math.random() < 0.4) {
+    return { text:"🔁 Director calls for reshoots on yesterday's scenes. Schedule slips.", type:"event", turmoilDelta:3 };
+  }
+  const castActors = p.roles.map(r => r.actorId ? getActorById(r.actorId) : null).filter(Boolean);
+  const divas = castActors.filter(a => a.traits.includes("Diva"));
+  if (divas.length > 0 && Math.random() < 0.3) {
+    const diva = divas[Math.floor(Math.random()*divas.length)];
+    return { text:`😤 ${diva.name} is making demands on set again.`, type:"bad", turmoilDelta:5 };
+  }
+  const substanceActors = castActors.filter(a => a.traits.includes("Substance Abuse"));
+  if (substanceActors.length > 0 && Math.random() < 0.2) {
+    const sa = substanceActors[Math.floor(Math.random()*substanceActors.length)];
+    return { text:`⚠ ${sa.name} didn't show up for this morning's shoot.`, type:"bad", turmoilDelta:6 };
+  }
+  const mentors = castActors.filter(a => a.traits.includes("Mentor"));
+  if (mentors.length > 0 && Math.random() < 0.3) {
+    const mentor = mentors[Math.floor(Math.random()*mentors.length)];
+    return { text:`🌟 ${mentor.name} is elevating the whole cast's performance.`, type:"good", turmoilDelta:-2 };
+  }
+
+  return events[Math.floor(Math.random() * events.length)];
+}
+
+function calculateScores(p) {
+  const director = getDirectorById(p.directorId);
+  const castActors = p.roles.map(r => r.actorId ? getActorById(r.actorId) : null).filter(Boolean);
+
+  // CRITIC SCORE: average of performance skills
+  let perfTotal = 0;
+  let perfCount = 0;
+  castActors.forEach(a => {
+    const weight = p.roles.find(r=>r.actorId===a.id)?.type === "lead" ? 1.0 : 0.6;
+    const perf = (a.skills.range * 2 + a.skills.presence + a.skills.characterWork + a.skills.charisma) / 5;
+    perfTotal += perf * weight;
+    perfCount += weight;
+  });
+  const avgActorPerf = perfCount > 0 ? perfTotal / perfCount : 2.5;
+
+  let directorScore = 0;
+  if (director) {
+    directorScore = (director.skills.vision + director.skills.storytelling + director.skills.direction + director.skills.visualStyle) / 4;
+  }
+
+  const rawCritic = ((avgActorPerf / 5) * 50) + ((directorScore / 5) * 35) + (Math.random() * 15);
+  const turmoilPenalty = Math.floor(p.turmoil / 3);
+  const criticScore = Math.max(1, Math.min(100, Math.round(rawCritic - turmoilPenalty)));
+
+  // PUBLIC SCORE: cumulative star power + commercial instinct
+  let starTotal = 0;
+  castActors.forEach(a => { starTotal += a.skills.starPower + (a.reputation / 50); });
+  const dirCommercial = director ? director.skills.commercialInstinct : 2.5;
+  const rawPublic = ((starTotal / (castActors.length || 1)) / 6) * 40 + ((dirCommercial / 5) * 25) + (STATE.commercialDraw / 100) * 20 + (Math.random() * 15);
+  const publicScore = Math.max(1, Math.min(100, Math.round(rawPublic - turmoilPenalty * 0.5)));
+
+  return { criticScore, publicScore, turmoilPenalty };
+}
+
+function updateCareerFilms(p) {
+  const castActors = p.roles.map(r => r.actorId ? getActorById(r.actorId) : null).filter(Boolean);
+  castActors.forEach(a => {
+    a.careerFilms.push({ title: p.title, year: p.year, role: p.roles.find(r=>r.actorId===a.id)?.type, quality: p.scores.criticScore });
+    a.reputation = Math.min(100, a.reputation + Math.round((p.scores.criticScore - 50) / 10));
+    a.relevance = Math.min(100, a.relevance + 5);
+  });
+  const director = getDirectorById(p.directorId);
+  if (director) {
+    director.careerFilms.push({ title: p.title, year: p.year, quality: p.scores.criticScore });
+    director.reputation = Math.min(100, director.reputation + Math.round((p.scores.criticScore - 50) / 8));
+  }
+  STATE.completedFilms.push({ id: p.id, title: p.title, year: p.year, genre: p.genre, criticScore: p.scores.criticScore, publicScore: p.scores.publicScore });
+  STATE.criticalPrestige = Math.min(100, STATE.criticalPrestige + Math.round((p.scores.criticScore - 50) / 8));
+  STATE.commercialDraw = Math.min(100, STATE.commercialDraw + Math.round((p.scores.publicScore - 50) / 8));
+}
+
+// ============================================================
+// BOOT
+// ============================================================
+
+loadGame();
+render();
+
+</script>
+</body>
+</html>
